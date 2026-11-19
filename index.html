@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学伴星球 · 儿童学伴原型</title>
+<style>
+:root{
+  --bg:#FFF6E9; --card:#FFFFFF; --ink:#3B3A45; --sub:#8C8A97;
+  --blue:#58A6E8; --blue-d:#3D8BD1; --yellow:#FFC53D; --coral:#FF7A6B;
+  --green:#58C07A; --purple:#9B7EDE; --line:#F0E7D8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
+body{background:linear-gradient(160deg,#EAF4FF,#FFF3E0);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;color:var(--ink)}
+.hint{font-size:13px;color:#6B7280;text-align:center;line-height:1.7}
+.phone{position:relative;width:400px;max-width:96vw;height:790px;max-height:92vh;background:var(--bg);border-radius:46px;box-shadow:0 24px 60px rgba(60,80,140,.28);overflow:hidden;border:9px solid #2E3140}
+.statusbar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:13px;font-weight:800;color:var(--ink)}
+.topbar{height:52px;display:flex;align-items:center;padding:0 14px;gap:10px}
+.topbar .back{width:38px;height:38px;border-radius:14px;background:#fff;border:none;font-size:18px;font-weight:900;box-shadow:0 4px 10px rgba(90,110,160,.12);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.topbar .ttl{font-size:19px;font-weight:900;flex:1}
+.topbar .chip{background:#fff;border-radius:12px;padding:7px 12px;font-size:14px;font-weight:800;box-shadow:0 4px 10px rgba(90,110,160,.10)}
+.screen{position:absolute;top:34px;left:0;right:0;bottom:0;display:none;flex-direction:column;padding-bottom:90px;overflow-y:auto;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:flex}
+.body{padding:10px 20px 20px;display:flex;flex-direction:column;gap:14px;flex:1}
+.card{background:var(--card);border-radius:22px;padding:18px;box-shadow:0 6px 16px rgba(90,110,160,.10)}
+.bigbtn{background:var(--blue);color:#fff;font-size:18px;font-weight:900;border-radius:18px;padding:16px;border:none;width:100%;cursor:pointer;box-shadow:0 8px 18px rgba(88,166,232,.35)}
+.bigbtn:active{transform:scale(.97)}
+.bigbtn.g{background:var(--green);box-shadow:0 8px 18px rgba(88,192,122,.35)}
+.bigbtn.y{background:var(--yellow);color:#6B4E00;box-shadow:0 8px 18px rgba(255,197,61,.4)}
+.bigbtn.o{background:var(--coral);box-shadow:0 8px 18px rgba(255,122,107,.35)}
+.bigbtn.p{background:var(--purple);box-shadow:0 8px 18px rgba(155,126,222,.35)}
+.ghost{background:#fff;color:var(--blue-d);border:3px solid var(--blue);border-radius:18px;padding:13px;font-size:16px;font-weight:900;width:100%;cursor:pointer}
+.opt{background:#fff;border:3px solid transparent;border-radius:20px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 5px 12px rgba(90,110,160,.10);width:100%;font-size:17px;font-weight:800;text-align:left}
+.opt.sel{border-color:var(--blue);background:#EFF7FF}
+.opt .em{font-size:34px}
+.opt .rt{margin-left:auto;font-size:20px}
+.opt.correct{border-color:var(--green);background:#EAF9EF;animation:pop .35s}
+.opt.wrong{border-color:var(--coral);background:#FFF0ED;animation:shake .4s}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:#fff;border:3px solid transparent;border-radius:999px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 10px rgba(90,110,160,.10)}
+.chip.sel{border-color:var(--blue);background:#EFF7FF}
+.mascot{width:96px;height:96px;border-radius:50%;background:#FFF;display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 10px 24px rgba(90,110,160,.18);border:4px solid var(--yellow)}
+.speech{background:#fff;border:3px solid var(--yellow);border-radius:22px;padding:14px 18px;font-weight:800;font-size:16px;line-height:1.6;position:relative;animation:pop .35s}
+.speech::after{content:'';position:absolute;top:-11px;left:52px;width:16px;height:16px;background:#fff;border-left:3px solid var(--yellow);border-top:3px solid var(--yellow);transform:rotate(45deg)}
+.gcard{border-radius:24px;padding:20px;color:#fff;display:flex;flex-direction:column;gap:8px;cursor:pointer;border:none;text-align:left;box-shadow:0 10px 22px rgba(90,110,160,.22)}
+.gcard:active{transform:scale(.97)}
+.gcard .em{font-size:40px}
+.gcard .t{font-size:19px;font-weight:900}
+.gcard .d{font-size:13px;opacity:.92;line-height:1.5}
+.gcard.b1{background:linear-gradient(135deg,#FFC53D,#FF9F43)}
+.gcard.b2{background:linear-gradient(135deg,#9B7EDE,#6C5CE7)}
+.gcard.b3{background:linear-gradient(135deg,#FF7A6B,#EE5253)}
+.gcard.b4{background:linear-gradient(135deg,#58C07A,#2EBC6F)}
+.gcard.b5{background:linear-gradient(135deg,#58A6E8,#3D7BD9)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ring{width:116px;height:116px;border-radius:50%;background:conic-gradient(#58C07A calc(var(--p)*1%), #F0E7D8 0);display:flex;align-items:center;justify-content:center}
+.ring .in{width:86px;height:86px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900}
+.task{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:14px;box-shadow:0 5px 12px rgba(90,110,160,.10)}
+.task .ck{width:30px;height:30px;border-radius:50%;border:3px solid var(--blue);background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.task.done .ck{background:var(--green);border-color:var(--green)}
+.task.done .tt{text-decoration:line-through;color:var(--sub)}
+.task .tt{font-weight:800;flex:1}
+.tag{background:#EFF7FF;color:var(--blue-d);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800}
+.book{display:flex;gap:14px;background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 14px rgba(90,110,160,.10);cursor:pointer}
+.book .cv{width:66px;height:88px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;flex-shrink:0}
+.book .tt{font-weight:900;font-size:17px}
+.book .d{font-size:13px;color:var(--sub);margin-top:4px}
+.page{background:#FFFBEF;border:3px solid var(--line);border-radius:22px;padding:22px;font-size:18px;line-height:2.1;font-weight:700;min-height:230px}
+.word{display:inline-block;background:#FFF3D6;border-radius:9px;padding:0 7px;margin:0 2px;cursor:pointer;border-bottom:3px dashed var(--yellow)}
+.dot{display:flex;gap:8px;justify-content:center}
+.dot i{width:10px;height:10px;border-radius:50%;background:#E8DFD0}
+.dot i.on{background:var(--blue)}
+.q{font-size:20px;font-weight:900;text-align:center;line-height:1.6;background:#fff;border-radius:20px;padding:22px;box-shadow:0 6px 14px rgba(90,110,160,.10)}
+.mic{width:110px;height:110px;border-radius:50%;background:var(--coral);color:#fff;font-size:44px;border:none;cursor:pointer;box-shadow:0 12px 26px rgba(255,122,107,.4);display:flex;align-items:center;justify-content:center;margin:0 auto}
+.mic:active{transform:scale(.93)}
+.pbar{height:16px;background:#F0E7D8;border-radius:999px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--green);border-radius:999px;width:0;transition:width .2s}
+.fb{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 0}
+.fb .big{font-size:72px;animation:pop .5s}
+.fb .tt{font-size:24px;font-weight:900}
+.fb .d{font-size:15px;color:var(--sub);line-height:1.7}
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:15px;box-shadow:0 5px 12px rgba(90,110,160,.10);cursor:pointer;border:3px solid transparent}
+.step.done{border-color:var(--green);background:#EAF9EF}
+.step .em{font-size:30px}
+.step .t{font-weight:900;flex:1}
+.step .ok{width:26px;height:26px;border-radius:50%;border:3px solid #D8CFC0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.step.done .ok{background:var(--green);border-color:var(--green)}
+.badgeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge{background:#fff;border-radius:18px;padding:14px 8px;text-align:center;box-shadow:0 5px 12px rgba(90,110,160,.10);display:flex;flex-direction:column;gap:6px;align-items:center}
+.badge .em{font-size:36px;filter:grayscale(1);opacity:.45}
+.badge.got .em{filter:none;opacity:1}
+.badge .t{font-size:13px;font-weight:800}
+.badge.got{border:3px solid var(--yellow)}
+.badge .st{font-size:11px;color:var(--sub)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.key{background:#fff;border:none;border-radius:18px;padding:18px;font-size:22px;font-weight:900;box-shadow:0 5px 12px rgba(90,110,160,.12);cursor:pointer}
+.key:active{transform:scale(.94)}
+.dots{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.dots i{width:14px;height:14px;border-radius:50%;background:#E8DFD0}
+.dots i.f{background:var(--blue)}
+.bar{display:flex;align-items:center;gap:12px;margin:8px 0}
+.bar .lb{width:110px;font-size:14px;font-weight:800}
+.bar .tr{flex:1;height:14px;background:#F0E7D8;border-radius:999px;overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--blue);border-radius:999px}
+.bar .vl{width:46px;font-size:13px;font-weight:800;text-align:right}
+.row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:16px;box-shadow:0 5px 12px rgba(90,110,160,.10);cursor:pointer;border:none;width:100%;font-size:16px;font-weight:800;text-align:left}
+.row .em{font-size:26px}
+.row .rt{margin-left:auto;color:var(--sub)}
+.tgl{margin-left:auto;width:52px;height:30px;border-radius:999px;background:#E4DCCF;position:relative;flex-shrink:0}
+.tgl.on{background:var(--green)}
+.tgl i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
+.tgl.on i{left:25px}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:82px;background:#fff;border-radius:26px 26px 0 0;display:none;box-shadow:0 -8px 24px rgba(90,110,160,.14);z-index:30}
+.tabbar.show{display:flex}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:800;color:#9A9AA5;background:none;border:none;cursor:pointer}
+.tab .em{font-size:22px}
+.tab.on{color:var(--blue-d)}
+.bubble{position:absolute;left:50%;transform:translateX(-50%);bottom:130px;background:#fff;border:3px solid var(--yellow);border-radius:20px;padding:13px 18px;font-weight:900;font-size:15px;box-shadow:0 12px 30px rgba(90,110,160,.3);z-index:60;opacity:0;transition:.3s;max-width:86%;text-align:center;pointer-events:none}
+.bubble.show{opacity:1;bottom:150px}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.float{animation:float 2.6s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div class="hint">学伴星球 · 儿童学伴原型<br>直接点击手机里的按钮交互体验(建议用浏览器全屏演示)</div>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span>🔋 📶</span></div>
+
+  <!-- 1 欢迎页 -->
+  <section class="screen active" id="s-welcome" data-tab="0" data-back="0">
+    <div class="body" style="align-items:center;justify-content:center;gap:26px;text-align:center">
+      <div class="mascot float" style="font-size:64px">🌍</div>
+      <div style="font-size:30px;font-weight:900">学伴星球</div>
+      <div style="font-size:15px;color:var(--sub);line-height:1.8">一个陪小朋友快乐学习的星球<br>学习计划 · 阅读陪伴 · 知识练习</div>
+      <button class="bigbtn" style="width:80%" onclick="go('pick')">🚀 开始探索</button>
+    </div>
+  </section>
+
+  <!-- 2 选择学伴 -->
+  <section class="screen" id="s-pick" data-tab="0" data-back="0">
+    <div class="body" style="justify-content:center;gap:18px">
+      <div style="text-align:center;font-size:22px;font-weight:900;margin-top:20px">选一个学伴陪你学习吧!</div>
+      <div style="display:flex;gap:12px;justify-content:center" id="mascots">
+        <div class="opt" style="flex-direction:column;text-align:center;gap:8px;width:100px" onclick="pickMascot(this,'🐻','团团')"><span class="em">🐻</span>团团</div>
+        <div class="opt sel" style="flex-direction:column;text-align:center;gap:8px;width:100px" onclick="pickMascot(this,'🐰','雪球')"><span class="em">🐰</span>雪球</div>
+        <div class="opt" style="flex-direction:column;text-align:center;gap:8px;width:100px" onclick="pickMascot(this,'🌟','小星')"><span class="em">🌟</span>小星</div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-weight:900">你的名字</div>
+        <input id="kidName" maxlength="6" value="豆豆" style="border:3px solid var(--line);border-radius:14px;padding:12px;font-size:17px;font-weight:800;text-align:center">
+      </div>
+      <button class="bigbtn" onclick="enterPlanet()">进入星球 ➜</button>
+    </div>
+  </section>
+
+  <!-- 3 图形引导1 -->
+  <section class="screen" id="s-guide1" data-tab="0" data-back="0">
+    <div class="body" style="justify-content:center;gap:22px;text-align:center">
+      <div style="font-size:22px;font-weight:900;margin-top:16px">看不懂字也没关系,<br>看图就会用!</div>
+      <div class="grid2">
+        <div class="card" style="text-align:center"><div style="font-size:44px">📋</div><div style="font-weight:800;margin-top:8px">看今天要做什么</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:44px">📖</div><div style="font-weight:800;margin-top:8px">一起读绘本</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:44px">🎯</div><div style="font-weight:800;margin-top:8px">闯关做练习</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:44px">🏆</div><div style="font-weight:800;margin-top:8px">收集小徽章</div></div>
+      </div>
+      <button class="bigbtn" onclick="go('guide2')">下一步</button>
+    </div>
+  </section>
+
+  <!-- 4 图形引导2 -->
+  <section class="screen" id="s-guide2" data-tab="0" data-back="0">
+    <div class="body" style="justify-content:center;gap:22px;text-align:center">
+      <div style="font-size:22px;font-weight:900;margin-top:16px">听学伴的话,<br>一步一步慢慢来</div>
+      <div class="mascot float" style="margin:0 auto" id="guideM">🐰</div>
+      <div class="speech" style="text-align:left">你好呀!我会用最短的话告诉你下一步做什么,跟着点就可以啦!</div>
+      <button class="bigbtn g" onclick="startHome()">🎉 开始学习</button>
+      <button class="ghost" onclick="startHome()">跳过</button>
+    </div>
+  </section>
+
+  <!-- 5 首页 -->
+  <section class="screen" id="s-home" data-tab="1" data-back="0">
+    <div class="topbar"><div class="ttl">🏠 学伴星球</div><span class="chip" id="starTop">⭐ 0</span></div>
+    <div class="body">
+      <div style="display:flex;gap:14px;align-items:center">
+        <div class="mascot" style="width:72px;height:72px;font-size:38px" id="homeM">🐰</div>
+        <div class="speech" id="homeSpeech">你好,豆豆!今天也要加油哦!</div>
+      </div>
+      <div class="card" style="display:flex;align-items:center;gap:18px">
+        <div class="ring" id="ring" style="--p:0"><div class="in"><div style="font-size:22px" id="ringNum">0/2</div><div style="font-size:11px;color:var(--sub)">已完成</div></div></div>
+        <div style="flex:1">
+          <div style="font-weight:900;font-size:17px">今日任务</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.7;margin-top:6px">完成计划就能收集星星,<br>集满徽章有惊喜哦!</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <button class="gcard b1" onclick="tab('plan')"><span class="em">📋</span><span class="t">学习计划</span><span class="d">每天的任务清单</span></button>
+        <button class="gcard b2" onclick="tab('read')"><span class="em">📖</span><span class="t">阅读陪伴</span><span class="d">绘本点读和跟读</span></button>
+        <button class="gcard b3" onclick="tab('quiz')"><span class="em">🎯</span><span class="t">知识练习</span><span class="d">闯关答题赢星星</span></button>
+        <button class="gcard b4" onclick="tab('me')"><span class="em">😊</span><span class="t">我的</span><span class="d">徽章和家长模式</span></button>
+      </div>
+      <button class="ghost" onclick="go('rest')">⏰ 演示休息提醒</button>
+    </div>
+  </section>
+
+  <!-- 6 今日计划 -->
+  <section class="screen" id="s-plan" data-tab="1" data-back="0">
+    <div class="topbar"><div class="ttl">📋 今日计划</div></div>
+    <div class="body">
+      <div id="taskList" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div id="allDoneBtn" style="display:none">
+        <button class="bigbtn g" onclick="go('summary')">🎉 全部完成!看看今天的收获</button>
+      </div>
+      <button class="bigbtn y" onclick="go('plan-add1')">➕ 添加新计划</button>
+    </div>
+  </section>
+
+  <!-- 7 添加计划-选科目 -->
+  <section class="screen" id="s-plan-add1" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">添加计划 · 第1步</div></div>
+    <div class="body">
+      <div class="speech">先选要做什么(第 1 步,共 3 步)</div>
+      <button class="opt" onclick="pickSubj(this,'语文')"><span class="em">📚</span>语文<span class="rt">➜</span></button>
+      <button class="opt" onclick="pickSubj(this,'数学')"><span class="em">🔢</span>数学<span class="rt">➜</span></button>
+      <button class="opt" onclick="pickSubj(this,'英语')"><span class="em">🔤</span>英语<span class="rt">➜</span></button>
+      <button class="opt" onclick="pickSubj(this,'阅读')"><span class="em">📖</span>阅读<span class="rt">➜</span></button>
+      <button class="bigbtn" id="addNext1" onclick="go('plan-add2')" style="opacity:.5">下一步 ➜</button>
+    </div>
+  </section>
+
+  <!-- 8 添加计划-选时间 -->
+  <section class="screen" id="s-plan-add2" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">添加计划 · 第2步</div></div>
+    <div class="body">
+      <div class="speech">再选什么时候做(第 2 步,共 3 步)</div>
+      <div class="chips" id="timeChips">
+        <span class="chip" onclick="pickTime(this,'今天下午')">☀️ 今天下午</span>
+        <span class="chip" onclick="pickTime(this,'今天晚上')">🌙 今天晚上</span>
+        <span class="chip" onclick="pickTime(this,'明天早上')">🌅 明天早上</span>
+        <span class="chip" onclick="pickTime(this,'明天下午')">☀️ 明天下午</span>
+      </div>
+      <button class="bigbtn" id="addNext2" onclick="go('plan-add3')" style="opacity:.5">下一步 ➜</button>
+    </div>
+  </section>
+
+  <!-- 9 添加计划-确认 -->
+  <section class="screen" id="s-plan-add3" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">添加计划 · 第3步</div></div>
+    <div class="body" style="justify-content:center;gap:20px;text-align:center">
+      <div style="font-size:20px;font-weight:900">最后确认一下(第 3 步,共 3 步)</div>
+      <div class="card" style="font-size:18px;font-weight:900"><span id="addSumEm">📚</span> <span id="addSumTxt">语文 · 今天下午</span></div>
+      <button class="bigbtn g" onclick="confirmAdd()">✅ 确认添加</button>
+      <button class="ghost" onclick="back()">返回修改</button>
+    </div>
+  </section>
+
+  <!-- 10 书架 -->
+  <section class="screen" id="s-read" data-tab="1" data-back="0">
+    <div class="topbar"><div class="ttl">📖 阅读陪伴</div></div>
+    <div class="body">
+      <div class="speech" id="readSpeech">挑一本喜欢的绘本吧,点一点还能学发音!</div>
+      <div class="book" onclick="go('book')">
+        <div class="cv" style="background:linear-gradient(135deg,#9B7EDE,#6C5CE7)">🐴</div>
+        <div style="flex:1"><div class="tt">小马过河</div><div class="d">经典童话 · 认识勇敢 · 4 页 · 可点读</div><div class="tag" style="display:inline-block;margin-top:8px">✅ 今日可读</div></div>
+      </div>
+      <div class="book" style="opacity:.55" onclick="bubble('这本绘本明天才解锁哦','🐰')">
+        <div class="cv" style="background:linear-gradient(135deg,#FFC53D,#FF9F43)">🐢</div>
+        <div style="flex:1"><div class="tt">龟兔赛跑</div><div class="d">经典寓言 · 坚持就是胜利</div><div class="tag" style="display:inline-block;margin-top:8px;background:#F5F0E8;color:var(--sub)">🔒 明天解锁</div></div>
+      </div>
+      <div class="book" style="opacity:.55" onclick="bubble('这本绘本明天才解锁哦','🐰')">
+        <div class="cv" style="background:linear-gradient(135deg,#FF7A6B,#EE5253)">👑</div>
+        <div style="flex:1"><div class="tt">国王的新衣</div><div class="d">经典童话 · 学会诚实</div><div class="tag" style="display:inline-block;margin-top:8px;background:#F5F0E8;color:var(--sub)">🔒 明天解锁</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 绘本阅读 -->
+  <section class="screen" id="s-book" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">🐴 小马过河</div><span class="chip" id="pgNum">1/4</span></div>
+    <div class="body">
+      <div class="page" id="bookPage"></div>
+      <div class="dot" id="pgDots"></div>
+      <div style="display:flex;gap:10px">
+        <button class="ghost" id="pgPrev" onclick="pg(-1)">‹ 上一页</button>
+        <button class="ghost" id="pgNext" onclick="pg(1)">下一页 ›</button>
+      </div>
+      <button class="bigbtn p" id="toFollow" style="display:none" onclick="go('follow')">🎤 去跟读 ➜</button>
+    </div>
+  </section>
+
+  <!-- 12 跟读 -->
+  <section class="screen" id="s-follow" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">🎤 跟读练习</div></div>
+    <div class="body" style="justify-content:center;gap:22px;text-align:center">
+      <div class="speech" style="text-align:left">跟着读一句:按住麦克风,读完再松开!</div>
+      <div class="card" style="font-size:22px;font-weight:900">“原来河水不深也不浅。”</div>
+      <button class="mic" id="micBtn" onpointerdown="micDown()" onpointerup="micUp()" onpointerleave="micUp()">🎤</button>
+      <div class="pbar"><i id="micBar"></i></div>
+      <div id="micMsg" style="font-weight:800;color:var(--sub)">按住开始跟读</div>
+      <button class="bigbtn g" id="followDone" style="display:none" onclick="go('read-done')">✅ 完成跟读</button>
+    </div>
+  </section>
+
+  <!-- 13 阅读完成 -->
+  <section class="screen" id="s-read-done" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">阅读完成</div></div>
+    <div class="body" style="justify-content:center">
+      <div class="fb">
+        <div class="big">🏅</div>
+        <div class="tt">太棒了!读完一本绘本!</div>
+        <div class="d">获得徽章:阅读小书虫<br>奖励 ⭐ × 3(跟读满分)</div>
+        <button class="bigbtn" style="width:80%" onclick="tab('read')">回书架</button>
+        <button class="ghost" style="width:80%" onclick="tab('quiz')">去做练习 🎯</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 练习选科目 -->
+  <section class="screen" id="s-quiz" data-tab="1" data-back="0">
+    <div class="topbar"><div class="ttl">🎯 知识练习</div></div>
+    <div class="body">
+      <div class="speech" id="quizSpeech">闯关赢星星!答错了也没关系,可以再试!</div>
+      <button class="gcard b1" onclick="startQuiz('语文')"><span class="em">📚</span><span class="t">语文闯关</span><span class="d">3 道小题,认识汉字和词语</span></button>
+      <button class="gcard b2" onclick="startQuiz('数学')"><span class="em">🔢</span><span class="t">数学闯关</span><span class="d">3 道小题,算一算比一比</span></button>
+      <button class="gcard b3" onclick="startQuiz('英语')"><span class="em">🔤</span><span class="t">英语闯关</span><span class="d">3 道小题,认识英语单词</span></button>
+    </div>
+  </section>
+
+  <!-- 15 答题 -->
+  <section class="screen" id="s-quiz-q" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl" id="quizSubjT">语文闯关</div></div>
+    <div class="body" style="justify-content:center;gap:18px">
+      <div class="dot" id="qDots"><i class="on"></i><i></i><i></i></div>
+      <div class="q" id="qText"></div>
+      <div id="qOpts" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </section>
+
+  <!-- 16 答对 -->
+  <section class="screen" id="s-quiz-ok" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">答对啦</div></div>
+    <div class="body" style="justify-content:center">
+      <div class="fb">
+        <div class="big">✅</div>
+        <div class="tt" id="okPraise">真聪明!</div>
+        <div class="d">⭐ +1</div>
+        <button class="bigbtn g" id="okBtn" style="width:80%" onclick="nextQ()">下一题 ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 答错 -->
+  <section class="screen" id="s-quiz-no" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">再想想</div></div>
+    <div class="body" style="justify-content:center">
+      <div class="fb">
+        <div class="big">🤔</div>
+        <div class="tt">没关系,再试一次!</div>
+        <div class="d">想一想,再选一次,你一定能行!</div>
+        <button class="bigbtn o" style="width:80%" onclick="retryQ()">🔄 再试一次</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 结算 -->
+  <section class="screen" id="s-quiz-done" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">成绩单</div></div>
+    <div class="body" style="justify-content:center">
+      <div class="fb">
+        <div class="big" id="doneEm">🏆</div>
+        <div class="tt" id="doneTt">满分通过!</div>
+        <div class="d" id="doneD"></div>
+        <button class="bigbtn" style="width:80%" onclick="tab('quiz')">再闯一关</button>
+        <button class="ghost" style="width:80%" onclick="tab('home')">回首页</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 休息提醒 -->
+  <section class="screen" id="s-rest" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">⏰ 休息提醒</div></div>
+    <div class="body" style="justify-content:center;gap:20px;text-align:center">
+      <div class="mascot float" style="margin:0 auto;font-size:50px">😊</div>
+      <div style="font-size:22px;font-weight:900">你已经学习 20 分钟啦!</div>
+      <div class="speech" style="text-align:left">眼睛累了吗?休息一下,做个小眼保健操,眼睛会亮亮的哦!</div>
+      <button class="bigbtn g" onclick="go('rest-eyes')">👀 开始做眼保健操</button>
+      <button class="ghost" onclick="back()">我还不累,继续学习</button>
+    </div>
+  </section>
+
+  <!-- 20 眼保健操 -->
+  <section class="screen" id="s-rest-eyes" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">👀 眼保健操</div><span class="chip" id="eyeCnt">0/3</span></div>
+    <div class="body">
+      <div class="speech">跟着做,做满 3 个动作就完成啦!(一步一步来)</div>
+      <div class="steps" id="eyeSteps">
+        <div class="step" onclick="doStep(this)"><span class="em">🖐️</span><span class="t">轻轻揉一揉眉毛边</span><span class="ok">✓</span></div>
+        <div class="step" onclick="doStep(this)"><span class="em">🏔️</span><span class="t">看看远处 10 秒钟</span><span class="ok">✓</span></div>
+        <div class="step" onclick="doStep(this)"><span class="em">😉</span><span class="t">眨眨眼睛 10 下</span><span class="ok">✓</span></div>
+      </div>
+      <button class="bigbtn g" id="eyeDone" style="display:none" onclick="restDone()">✅ 休息完成</button>
+    </div>
+  </section>
+
+  <!-- 21 徽章墙 -->
+  <section class="screen" id="s-badges" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">🏆 徽章墙</div></div>
+    <div class="body">
+      <div class="badgeGrid" id="badgeGrid"></div>
+      <div class="speech" id="badgeSpeech">完成小任务就能点亮徽章!</div>
+    </div>
+  </section>
+
+  <!-- 22 家长密码 -->
+  <section class="screen" id="s-parent" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">👨‍👩‍👧 家长模式</div></div>
+    <div class="body" style="justify-content:center;gap:18px;text-align:center">
+      <div style="font-size:40px">🔐</div>
+      <div style="font-size:17px;font-weight:900">请输入家长密码<br><span style="font-size:13px;color:var(--sub)">(演示密码:1234)</span></div>
+      <div class="dots" id="pwDots"><i></i><i></i><i></i><i></i></div>
+      <div class="keypad" id="keypad">
+        <button class="key" onclick="pw(1)">1</button><button class="key" onclick="pw(2)">2</button><button class="key" onclick="pw(3)">3</button>
+        <button class="key" onclick="pw(4)">4</button><button class="key" onclick="pw(5)">5</button><button class="key" onclick="pw(6)">6</button>
+        <button class="key" onclick="pw(7)">7</button><button class="key" onclick="pw(8)">8</button><button class="key" onclick="pw(9)">9</button>
+        <button class="key" onclick="pwDel()" style="color:var(--coral)">⌫</button><button class="key" onclick="pw(0)">0</button><button class="key" onclick="pwGo()" style="color:var(--green)">✓</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 23 家长报告 -->
+  <section class="screen" id="s-parent-report" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">📊 今日学习报告</div></div>
+    <div class="body">
+      <div class="card">
+        <div style="font-weight:900;font-size:17px">豆豆的学习情况</div>
+        <div style="font-size:13px;color:var(--sub);margin-top:4px">由孩子今日操作自动生成(演示数据)</div>
+        <div style="margin-top:16px">
+          <div class="bar"><span class="lb">📋 计划完成</span><div class="tr"><i id="rpPlanBar"></i></div><span class="vl" id="rpPlan">2/3</span></div>
+          <div class="bar"><span class="lb">📖 阅读</span><div class="tr"><i id="rpReadBar" style="background:var(--purple)"></i></div><span class="vl" id="rpRead">1 本</span></div>
+          <div class="bar"><span class="lb">🎯 练习</span><div class="tr"><i id="rpQuizBar" style="background:var(--coral)"></i></div><span class="vl" id="rpQuiz">⭐2</span></div>
+          <div class="bar"><span class="lb">⏱ 学习时长</span><div class="tr"><i style="width:80%;background:var(--yellow)"></i></div><span class="vl">40 分钟</span></div>
+        </div>
+      </div>
+      <button class="bigbtn" onclick="go('parent-set')">⚙️ 时长与休息设置</button>
+      <button class="ghost" onclick="back()">返回</button>
+    </div>
+  </section>
+
+  <!-- 24 家长设置 -->
+  <section class="screen" id="s-parent-set" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">⚙️ 时长与休息</div></div>
+    <div class="body">
+      <div class="card">
+        <div style="font-weight:900;margin-bottom:12px">每日学习时长上限</div>
+        <div class="chips" id="durChips">
+          <span class="chip" onclick="pickDur(this)">20 分钟</span>
+          <span class="chip sel" onclick="pickDur(this)">30 分钟</span>
+          <span class="chip" onclick="pickDur(this)">40 分钟</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:900;margin-bottom:12px">休息提醒</div>
+        <div style="font-size:14px;color:var(--sub);line-height:1.7">每学习 20 分钟提醒孩子做一次眼保健操(已开启)</div>
+        <button class="ghost" style="margin-top:10px" onclick="go('rest')">⏰ 立即演示休息提醒</button>
+      </div>
+      <button class="bigbtn g" onclick="saveDur()">💾 保存设置</button>
+    </div>
+  </section>
+
+  <!-- 25 我的 -->
+  <section class="screen" id="s-me" data-tab="1" data-back="0">
+    <div class="topbar"><div class="ttl">😊 我的</div></div>
+    <div class="body">
+      <div class="card" style="display:flex;align-items:center;gap:14px">
+        <div class="mascot" style="width:66px;height:66px;font-size:34px" id="meM">🐰</div>
+        <div style="flex:1"><div style="font-weight:900;font-size:19px" id="meName">豆豆</div><div style="font-size:13px;color:var(--sub);margin-top:4px">⭐ 星星 <span id="meStars">0</span> 颗</div></div>
+      </div>
+      <button class="row" onclick="go('badges')"><span class="em">🏆</span>我的徽章<span class="rt">›</span></button>
+      <button class="row" onclick="go('summary')"><span class="em">🌙</span>每日总结<span class="rt">›</span></button>
+      <button class="row" onclick="go('parent')"><span class="em">🔐</span>家长模式<span class="rt">›</span></button>
+      <button class="row" onclick="toggle(this,'声音')"><span class="em">🔊</span>声音<span class="tgl on" id="tglSound"><i></i></span></button>
+      <button class="row" onclick="toggle(this,'护眼模式')"><span class="em">🛡️</span>护眼模式<span class="tgl" id="tglEye"><i></i></span></button>
+    </div>
+  </section>
+
+  <!-- 26 每日总结 -->
+  <section class="screen" id="s-summary" data-tab="0" data-back="1">
+    <div class="topbar"><button class="back" onclick="back()">‹</button><div class="ttl">🌙 每日总结</div></div>
+    <div class="body" style="justify-content:center;text-align:center;gap:16px">
+      <div class="mascot float" style="margin:0 auto;font-size:48px" id="sumM">🐰</div>
+      <div style="font-size:24px;font-weight:900">今天表现真棒!</div>
+      <div class="card" style="font-size:15px;font-weight:800;line-height:2.2" id="sumBox"></div>
+      <button class="bigbtn" onclick="bubble('晚安,明天见!','🌙');setTimeout(()=>tab('home'),900)">🌙 晚安,去休息</button>
+    </div>
+  </section>
+
+  <div class="tabbar" id="tabbar">
+    <button class="tab on" id="tab-home" onclick="tab('home')"><span class="em">🏠</span>首页</button>
+    <button class="tab" id="tab-plan" onclick="tab('plan')"><span class="em">📋</span>计划</button>
+    <button class="tab" id="tab-read" onclick="tab('read')"><span class="em">📖</span>阅读</button>
+    <button class="tab" id="tab-quiz" onclick="tab('quiz')"><span class="em">🎯</span>练习</button>
+    <button class="tab" id="tab-me" onclick="tab('me')"><span class="em">😊</span>我的</button>
+  </div>
+</div>
+
+<script>
+/* ===== 全局状态与导航 ===== */
+const $=id=>document.getElementById(id);
+const state={mascot:'🐰',mname:'雪球',name:'豆豆',stars:0,
+  tasks:[{t:'完成语文作业',s:'语文',done:false},{t:'读绘本 10 分钟',s:'阅读',done:false}],
+  addSubj:null,addTime:null,
+  bookPg:0, readBadge:false,
+  quiz:{subj:'语文',i:0,ok:0}, quizStars:0,
+  badges:{}, eyeDone:0, pw:'',
+  sound:true, eyeMode:false};
+let cur='welcome', hist=[];
+const TABIDS=['home','plan','read','quiz','me'];
+
+function activate(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=$('s-'+id); el.classList.add('active');
+  const tb=$('tabbar');
+  tb.classList.toggle('show', el.dataset.tab==='1');
+  const idx=TABIDS.indexOf(id);
+  if(idx>=0){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===idx));}
+  cur=id; el.scrollTop=0;
+  if(id==='home') updateHome();
+  if(id==='plan') renderTasks();
+  if(id==='badges') renderBadges();
+  if(id==='summary') renderSummary();
+  if(id==='book') renderBook();
+  if(id==='parent-report') renderReport();
+}
+function go(id){ if(id!==cur) hist.push(cur); activate(id); }
+function back(){ if(hist.length) activate(hist.pop()); else activate('home'); }
+function tab(id){ hist=[]; activate(id); }
+function bubble(txt,em){
+  const b=document.createElement('div'); b.className='bubble';
+  b.innerHTML=(em||state.mascot)+' '+txt;
+  document.querySelector('.phone').appendChild(b);
+  requestAnimationFrame(()=>b.classList.add('show'));
+  setTimeout(()=>{b.classList.remove('show'); setTimeout(()=>b.remove(),350);},2500);
+}
+function addStar(n,txt){ state.stars+=n; $('starTop').textContent='⭐ '+state.stars;
+  $('meStars').textContent=state.stars; if(txt) bubble(txt+(n>0?' ⭐+'+n:'')); }
+
+/* ===== 选择学伴 ===== */
+function pickMascot(el,em,name){
+  document.querySelectorAll('#mascots .opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel'); state.mascot=em; state.mname=name;
+}
+function enterPlanet(){
+  state.name=($('kidName').value||'豆豆').trim()||'豆豆';
+  $('homeM').textContent=state.mascot; $('guideM').textContent=state.mascot;
+  $('meM').textContent=state.mascot; $('sumM').textContent=state.mascot;
+  $('meName').textContent=state.name;
+  go('guide1');
+}
+function startHome(){ updateHome(); tab('home'); }
+
+/* ===== 首页 ===== */
+function updateHome(){
+  $('homeSpeech').textContent='你好,'+state.name+'!今天也要加油哦!';
+  const done=state.tasks.filter(t=>t.done).length, tot=state.tasks.length;
+  $('ring').style.setProperty('--p', tot? Math.round(done/tot*100):0);
+  $('ringNum').textContent=done+'/'+tot;
+  $('starTop').textContent='⭐ '+state.stars;
+}
+
+/* ===== 计划 ===== */
+function renderTasks(){
+  const box=$('taskList'); box.innerHTML='';
+  state.tasks.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='task'+(t.done?' done':'');
+    d.innerHTML='<div class="ck" onclick="toggleTask('+i+')">'+(t.done?'✓':'')+'</div>'
+      +'<div class="tt">'+t.t+'</div><span class="tag">'+t.s+'</span>';
+    box.appendChild(d);
+  });
+  const all=state.tasks.length>0&&state.tasks.every(t=>t.done);
+  $('allDoneBtn').style.display=all?'block':'none';
+}
+function toggleTask(i){
+  const t=state.tasks[i];
+  if(!t.done){ t.done=true; addStar(1,'太棒了!任务完成'); }
+  else{ t.done=false; state.stars=Math.max(0,state.stars-1); $('starTop').textContent='⭐ '+state.stars; }
+  renderTasks(); updateHome();
+}
+function pickSubj(el,s){
+  document.querySelectorAll('#s-plan-add1 .opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel'); state.addSubj=s; $('addNext1').style.opacity=1;
+}
+function pickTime(el,t){
+  document.querySelectorAll('#timeChips .chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); state.addTime=t; $('addNext2').style.opacity=1;
+}
+function confirmAdd(){
+  const em={'语文':'📚','数学':'🔢','英语':'🔤','阅读':'📖'}[state.addSubj]||'📚';
+  $('addSumEm').textContent=em; $('addSumTxt').textContent=state.addSubj+' · '+state.addTime;
+  state.tasks.push({t:state.addSubj+' · '+state.addTime,s:state.addSubj,done:false});
+  state.addSubj=null; state.addTime=null;
+  document.querySelectorAll('#s-plan-add1 .opt').forEach(o=>o.classList.remove('sel'));
+  document.querySelectorAll('#timeChips .chip').forEach(c=>c.classList.remove('sel'));
+  $('addNext1').style.opacity=.5; $('addNext2').style.opacity=.5;
+  renderTasks(); bubble('新计划加好啦!','📋'); tab('plan');
+}
+
+/* ===== 阅读 ===== */
+const BOOK=[
+ {p:'小马长大了,要帮妈妈把麦子驮到河对岸的磨坊去。',w:[[0,2,'xiǎo mǎ'],[7,9,'mài zi']]},
+ {p:'小马来到河边,河水哗哗地流。他不知河水深不深,不敢过去。',w:[[7,9,'huā huā'],[14,15,'shēn bù shēn']]},
+ {p:'老牛说:“水很浅,刚没过小腿。”小松鼠说:“水很深,会淹死的!”',w:[[3,4,'lǎo niú'],[11,14,'xiǎo sōng shǔ']]},
+ {p:'小马小心地试一试,原来河水不深也不浅。他高兴地过了河。',w:[[7,10,'shì yī shì'],[18,20,'gāo xìng']]}
+];
+function renderBook(){
+  const pg=state.bookPg, b=BOOK[pg];
+  let html=b.p;
+  for(let k=b.w.length-1;k>=0;k--){ const [s,e,py]=b.w[k];
+    html=html.slice(0,s)+'<span class="word" data-py="'+py+'" onclick="wordTap(this)">'+html.slice(s,e)+'</span>'+html.slice(e);
+  }
+  $('bookPage').innerHTML=html;
+  $('pgNum').textContent=(pg+1)+'/4';
+  $('pgDots').innerHTML=[0,1,2,3].map(i=>'<i class="'+(i===pg?'on':'')+'"></i>').join('');
+  $('pgPrev').style.display=pg===0?'none':'block';
+  $('pgNext').style.display=pg===3?'none':'block';
+  $('toFollow').style.display=pg===3?'block':'none';
+}
+function pg(d){ state.bookPg=Math.min(3,Math.max(0,state.bookPg+d)); renderBook(); }
+function wordTap(el){ bubble('“'+el.textContent+'” 读作:'+el.dataset.py, '🔊'); }
+function micDown(){ clearInterval(window.micTimer); window.micTimer=setInterval(()=>{
+  const b=$('micBar'); let w=parseFloat(b.style.width||0)+4;
+  if(w>=100){ clearInterval(window.micTimer); b.style.width='100%';
+    $('micMsg').innerHTML='🌟 跟读完成!发音真标准,奖励 ⭐+3';
+    addStar(3,'跟读满分'); state.readBadge=true; $('followDone').style.display='block'; }
+  else b.style.width=w+'%';
+},160); $('micMsg').textContent='跟读中…读完记得松开哦'; }
+function micUp(){ clearInterval(window.micTimer); const b=$('micBar');
+  if(parseFloat(b.style.width||0)<100){ b.style.width=0; $('micMsg').textContent='还没读完,再按住试一次吧'; } }
+
+/* ===== 练习 ===== */
+const QUIZ={
+ '语文':[
+  {q:'哪个是苹果?',opts:['🍎 苹果','🍌 香蕉','🍇 葡萄'],a:0},
+  {q:'“小兔子,白又白”的下一句是?',opts:['两只耳朵竖起来','蹦蹦跳跳真可爱','爱吃萝卜和青菜'],a:0},
+  {q:'下面哪个字是“大”?',opts:['小','大','人'],a:1}],
+ '数学':[
+  {q:'2 + 3 = ?',opts:['4','5','6'],a:1},
+  {q:'比 7 少 2 的数是?',opts:['5','9','6'],a:0},
+  {q:'下面哪个是三角形?',opts:['⚪ 圆形','⬜ 方形','🔺 三角形'],a:2}],
+ '英语':[
+  {q:'“苹果”用英语怎么说?',opts:['Apple','Banana','Orange'],a:0},
+  {q:'下面哪个是“猫”?',opts:['🐶 dog','🐱 cat','🐷 pig'],a:1},
+  {q:'“hello”是什么意思?',opts:['再见','你好','谢谢'],a:1}]
+};
+const PRAISE=['真聪明!','太厉害啦!','你真是小天才!','回答得又快又好!'];
+function startQuiz(s){
+  state.quiz={subj:s,i:0,ok:0}; state.quizStars=0;
+  $('quizSubjT').textContent=s+'闯关'; $('quizSpeech').textContent='「'+s+'闯关」开始啦!答对一题 +1 ⭐';
+  renderQ(); activate('quiz-q');
+}
+function renderQ(){
+  const q=state.quiz, d=QUIZ[q.subj][q.i];
+  $('qDots').innerHTML=[0,1,2].map(i=>'<i class="'+(i<=q.i?'on':'')+'"></i>').join('');
+  $('qText').textContent=d.q;
+  $('qOpts').innerHTML=d.opts.map((o,i)=>'<button class="opt" onclick="answer('+i+')"><span>'+o+'</span><span class="rt">🔵</span></button>').join('');
+}
+function answer(i){
+  const q=state.quiz, d=QUIZ[q.subj][q.i];
+  const btns=document.querySelectorAll('#qOpts .opt');
+  if(i===d.a){
+    btns[i].classList.add('correct'); btns[i].querySelector('.rt').textContent='✅';
+    q.ok++; state.quizStars++; addStar(1);
+    $('okPraise').textContent=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+    $('okBtn').textContent=(q.i===2)?'查看成绩 🏆':'下一题 ➜';
+    activate('quiz-ok');
+  }else{
+    btns[i].classList.add('wrong'); btns[i].querySelector('.rt').textContent='❌';
+    bubble('再想想哦,你可以的!','🤔');
+  }
+}
+function nextQ(){
+  const q=state.quiz;
+  if(q.i===2){ showDone(); return; }
+  q.i++; renderQ(); activate('quiz-q');
+}
+function retryQ(){ activate('quiz-q'); }
+function showDone(){
+  const q=state.quiz, stars=q.ok;
+  $('doneEm').textContent=stars===3?'🏆':(stars>=2?'🌟':'💪');
+  $('doneTt').textContent=stars===3?'满分通过!':(stars>=2?'很不错!':'继续加油!');
+  let d='共答对 '+stars+' 题,获得 ⭐ × '+stars;
+  if(stars===3){ d+='\n获得徽章:练习小勇士!'; state.badges.quiz=true; }
+  $('doneD').textContent=d;
+  activate('quiz-done');
+}
+
+/* ===== 休息 ===== */
+function doStep(el){
+  if(el.classList.contains('done')) return;
+  el.classList.add('done'); state.eyeDone++;
+  $('eyeCnt').textContent=state.eyeDone+'/3';
+  bubble(['第一步完成!','第二步完成!','全做完了,你真棒!'][state.eyeDone-1]);
+  if(state.eyeDone===3) $('eyeDone').style.display='block';
+}
+function restDone(){
+  if(!state.badges.eye){ state.badges.eye=true; bubble('获得徽章:护眼小卫士!','👀'); }
+  addStar(2,'休息完成,眼睛亮亮的');
+  state.eyeDone=0; $('eyeDone').style.display='none'; $('eyeCnt').textContent='0/3';
+  document.querySelectorAll('#eyeSteps .step').forEach(s=>s.classList.remove('done'));
+  hist=[]; tab('home');
+}
+
+/* ===== 徽章 ===== */
+const BADGES=[
+ {em:'📋',t:'计划小达人',st:'完成 3 项计划',key:'plan'},
+ {em:'📖',t:'阅读小书虫',st:'读完 1 本绘本',key:'read'},
+ {em:'🎯',t:'练习小勇士',st:'一次闯关全对',key:'quiz'},
+ {em:'👀',t:'护眼小卫士',st:'完成 1 次眼保健操',key:'eye'},
+ {em:'🌟',t:'星星收藏家',st:'集满 10 颗星星',key:'star'},
+ {em:'🚀',t:'明日之星',st:'坚持学习 7 天',key:'week'}];
+function renderBadges(){
+  state.badges.read=state.readBadge; state.badges.plan=state.tasks.filter(t=>t.done).length>=3;
+  state.badges.star=state.stars>=10;
+  $('badgeGrid').innerHTML=BADGES.map(b=>{
+    const got=state.badges[b.key];
+    return '<div class="badge'+(got?' got':'')+'"><span class="em">'+b.em+'</span><span class="t">'+b.t+'</span><span class="st">'+(got?'已获得':b.st)+'</span></div>';
+  }).join('');
+  $('badgeSpeech').textContent=Object.values(state.badges).filter(Boolean).length>=3?'你已经点亮好几枚徽章啦,继续加油!':'完成小任务就能点亮徽章!';
+}
+
+/* ===== 家长 ===== */
+function pw(n){
+  if(state.pw.length>=4) return;
+  state.pw+=n;
+  document.querySelectorAll('#pwDots i').forEach((d,i)=>d.classList.toggle('f',i<state.pw.length));
+  if(state.pw.length===4) setTimeout(pwGo,250);
+}
+function pwDel(){ state.pw=state.pw.slice(0,-1);
+  document.querySelectorAll('#pwDots i').forEach((d,i)=>d.classList.toggle('f',i<state.pw.length)); }
+function pwGo(){
+  if(state.pw==='1234'){ state.pw=''; hist=[]; renderReport(); activate('parent-report');
+    document.querySelectorAll('#pwDots i').forEach(d=>d.classList.remove('f')); }
+  else{ state.pw=''; document.querySelectorAll('#pwDots i').forEach(d=>d.classList.remove('f'));
+    const kp=$('keypad'); kp.classList.add('wrong'); bubble('密码不对哦,再试一次','🔐');
+    setTimeout(()=>kp.classList.remove('wrong'),400); }
+}
+function renderReport(){
+  const done=state.tasks.filter(t=>t.done).length, tot=state.tasks.length;
+  $('rpPlan').textContent=done+'/'+tot;
+  $('rpPlanBar').style.width=(tot?Math.round(done/tot*100):0)+'%';
+  $('rpRead').textContent=state.readBadge?'1 本':'0 本';
+  $('rpReadBar').style.width=state.readBadge?'100%':'0%';
+  $('rpQuiz').textContent='⭐'+state.quizStars;
+  $('rpQuizBar').style.width=(state.quizStars/3*100)+'%';
+}
+function pickDur(el){ document.querySelectorAll('#durChips .chip').forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); }
+function saveDur(){ bubble('设置已保存!','💾'); }
+
+/* ===== 我的 ===== */
+function toggle(btn,name){
+  const t=btn.querySelector('.tgl'); const on=!t.classList.contains('on');
+  t.classList.toggle('on',on);
+  bubble(name+(on?'已开启':'已关闭'),'🔧');
+}
+
+/* ===== 总结 ===== */
+function renderSummary(){
+  const done=state.tasks.filter(t=>t.done).length, tot=state.tasks.length;
+  const n=state.badges.week?'7 天':1;
+  $('sumBox').innerHTML='⭐ 今天获得星星:'+state.stars+' 颗<br>📋 完成计划:'+done+'/'+tot+' 项<br>📖 阅读绘本:1 本<br>🎯 练习闯关:'+state.quizStars+' 题全对<br>👀 眼保健操:1 次';
+}
+
+/* ===== 启动 ===== */
+function firstBoot(){
+  renderTasks(); renderBook(); renderBadges(); updateHome();
+  activate('welcome');
+}
+firstBoot();
+</script>
+</body>
+</html>
